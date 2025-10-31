@@ -1,0 +1,51 @@
+// Jenkinsfile
+
+pipeline {
+    // 1. ENVIRONMENT SETUP
+    // 'agent any' means Jenkins will use any available agent/worker machine.
+    agent any
+
+    // Tools block automatically installs/configures Node.js based on the name 
+    // configured in 'Manage Jenkins' -> 'Tools' -> 'NodeJs Installations'.
+    tools {
+        // IMPORTANT: Replace 'NodeJS_18' with your actual Jenkins Node.js configuration name
+        nodejs 'nodejs-18'
+    }
+
+    // Environment variables (optional)
+    environment {
+        // Set the path for npm to install local dependencies correctly
+        PATH = "${tool 'nodejs-18'}/bin:${env.PATH}" 
+    }
+
+    // 2. STAGES DEFINITION
+    stages {
+        
+        // Stage 1: Checkout/Setup
+        stage('Checkout Source Code') {
+            steps {
+                // Retrieves the code from the SCM (Git) configured for the job
+                checkout scm 
+            }
+        }
+        
+        // Stage 2: Install Dependencies and Build
+        stage('Install & Build') {
+            steps {
+                echo 'Installing Node.js dependencies...'
+                // Install all packages defined in package.json
+                sh 'npm install' 
+                
+                // You might add an optional build step here for frontend projects (e.g., 'npm run build')
+                // sh 'npm run build' 
+            }
+        }
+        
+        // Stage 3: Run Tests
+        stage('Test') {
+            steps {
+                echo 'Running project tests...'
+                // Executes the 'test' script defined in package.json
+                sh 'npm test' 
+            }
+        }
